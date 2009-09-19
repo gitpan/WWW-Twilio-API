@@ -4,7 +4,7 @@ use 5.008001;
 use strict;
 use warnings;
 
-our $VERSION = '0.12';
+our $VERSION = '0.13';
 our $Debug   = 0;
 
 use Crypt::SSLeay ();
@@ -390,19 +390,19 @@ B<GET> method).
 
 =head2 What's Missing? TwiML
 
-The missing magical piece, which unfortunately is beyond the scope of
-this documentation, is the TwiML, which is supplied by the I<Url>
-resource parameter you may have noticed above in the examples using
-the I<Calls> resource.
+The missing magical piece is the TwiML, which is supplied by the
+I<Url> resource parameter you may have noticed above in the I<Calls>
+resource examples.
 
-TwiML controls the flow of your call application, including responsing
+TwiML controls the flow of your call application, including responding
 to key presses, playing audio files, or "reading" text-to-speech
 phrases to the person on the other end of the line.
 
-You will need to give the I<Calls> resource a URL that returns TwiML
-(see http://www.twilio.com/docs/api_reference/TwiML/). This is not
-hard, but it does require you to have a web server somewhere on the
-Internet that can reply to GET or POST requests.
+To continue the I<Calls> example, You will need to give the I<Calls>
+resource a URL that returns TwiML (see
+http://www.twilio.com/docs/api_reference/TwiML/). This is not hard,
+but it does require you to have a web server somewhere on the Internet
+that can reply to GET or POST requests.
 
 A TwiML document looks like this:
 
@@ -445,8 +445,11 @@ and when you did this:
 Twilio's API would call '123-123-1234' and when someone answers, they
 will hear "Nice to meet you" in a somewhat computerized voice.
 
-Please see http://www.twilio.com/docs/api_reference/TwiML/ for full
-TwiML documentation.
+Go ahead and follow the twimlets.com link above and view the source in
+your browser window. It's just a plain XML document.
+
+See http://www.twilio.com/docs/api_reference/TwiML/ for full TwiML
+documentation.
 
 =head1 METHODS
 
@@ -460,15 +463,15 @@ Available parameters:
 
 =over 4
 
-=item AccountSid
+=item B<AccountSid>
 
 Your account B<sid> (begins with 'AC')
 
-=item AuthToken
+=item B<AuthToken>
 
 Your account B<auth token>.
 
-=item API_VERSION
+=item B<API_VERSION>
 
 Defaults to '2008-08-01'. You won't need to set this unless: a) Twilio
 updates their API, and b) you want to take advantage of it.
@@ -479,6 +482,7 @@ Example:
 
   my $twilio = new WWW::Twilio::API( AccountSid => 'AC...',
                                      AuthToken  => '...' );
+
 =head2 General API calls
 
 All API calls are of the form:
@@ -490,10 +494,17 @@ where METHOD is one of B<GET>, B<POST>, B<PUT>, or B<DELETE>, and
 "/2008-08-01/Accounts/{YourAccountSid}/".
 
 Note that you do not need to URI encode the parameters;
-B<WWW::Twilio::API> handles that for you (this means that you don't
-have to do anything special).
+B<WWW::Twilio::API> handles that for you (this just means that you
+don't have to do anything special with the parameters you give the
+B<WWW::Twilio::API> object).
 
-Each of B<GET>, B<POST>, B<PUT>, and B<DELETE> return a hashref with
+  Note: There is one exception to URI encoding: when you are passing a
+  I<Url> parameter (e.g., to the I<Calls> resource), and that URL
+  contains a B<GET> query string, that query string needs to be URI
+  encoded. See the F<examples.pl> file with this distribution for an
+  example of that.
+
+Each of B<GET>, B<POST>, B<PUT>, and B<DELETE> returns a hashref with
 the call results, the most important of which is the I<content>
 element. This is the untouched, raw response of the Twilio API server,
 suitable for you to do whatever you want with it. For example, you
@@ -512,17 +523,17 @@ Here are the (current) elements in the response:
 
 =over 4
 
-=item content
+=item B<content>
 
 Contains the response content (in XML or CSV or HTML if specified).
 
-=item code
+=item B<code>
 
 Contains the HTTP status code. You should check this after each call
 to make sure it's what you'd expect (according to the API). Most
 successful responses will be '200', but some are '204' or others.
 
-=item message
+=item B<message>
 
 A brief HTTP status message, corresponding to the status code. For 200
 codes, the message will be "OK". For "400" codes, the message will be
@@ -534,6 +545,18 @@ explanations may be found here:
   http://www.w3.org/Protocols/rfc2616/rfc2616-sec10.html
 
 =back
+
+Example:
+
+  $response = $twilio->GET('Calls/CA42ed11f93dc08b952027ffbc406d0868');
+
+B<$response> is a hashref that looks like this:
+
+  {
+    content => '<an xml string>',
+    code    => '200',
+    message => 'OK',
+  }
 
 =head2 CSV and HTML content
 
@@ -549,13 +572,13 @@ your I<API resource>.
 
 =head2 GET
 
-Sends a I<GET> request to the Twilio REST API.
+Sends a B<GET> request to the Twilio REST API.
 
 Available parameters:
 
 =over 4
 
-=item API resource name
+=item B<API resource name>
 
 The first argument to B<GET> should always be the API resource name
 you want to invoke. Examples include I<Accounts>, I<Calls>,
@@ -573,16 +596,20 @@ especially when you're using a B<POST> method.
 
 You may wish to append '.csv' or '.html' to the API resource to
 receive results in CSV (comma-separated values) or HTML formats,
-instead of the default XML.  =item API resource parameters
+instead of the default XML. See L</"CSV and HTML content"> above.
 
-=item API resource parameters
+=item B<API resource parameters>
 
 Each API resource takes zero or more key-value pairs as
 parameters. See the B<POST> method below for examples.
 
 =back
 
-Examples:
+None of the following examples use I<resource parameters>; see the
+B<POST> section for examples illustrating the use of I<resource
+parameters>.
+
+B<GET> examples:
 
   ## get a list of all calls
   $response = $twilio->GET('Calls');
@@ -607,7 +634,8 @@ Same as B<GET>.
 The following examples illustrate the use of an I<API resource> with
 I<resource parameters>:
 
-  ## validate a CallerId
+  ## validate a CallerId: 'OutgoingCallerIds' is the API resource and
+  ## everything else are resource parameters
   $response = $twilio->POST('OutgoingCallerIds',
                             FriendlyName => "Some Caller Id",
                             PhoneNumber  => '1234567890');
