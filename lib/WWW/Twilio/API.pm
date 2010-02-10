@@ -4,7 +4,7 @@ use 5.008001;
 use strict;
 use warnings;
 
-our $VERSION = '0.13';
+our $VERSION = '0.14';
 our $Debug   = 0;
 
 use Crypt::SSLeay ();
@@ -77,6 +77,7 @@ sub _do_request {
 
     local $ENV{HTTPS_DEBUG} = $Debug;
     my $res = $lwp->request($req);
+    print STDERR "Request sent: " . $req->as_string . "\n" if $Debug;
 
     return { code    => $res->code,
              message => $res->message,
@@ -645,6 +646,12 @@ I<resource parameters>:
                             Caller => '1231231234',
                             Called => '9081231234',
                             Url    => 'http://some.where/handler');
+
+  ## send an SMS message
+  $response = $twilio->POST('SMS/Messages',
+                            From => '1231231234',
+                            To   => '9081231234',
+                            Body => "Hey, let's have lunch" );
 
 =head2 PUT
 

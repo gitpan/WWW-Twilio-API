@@ -1,5 +1,15 @@
 Revision history for Perl extension WWW::Twilio::API.
 
+0.14 - documentation updates
+------------------------------------------------------------------------
+r12 | scott | 2010-02-10 06:59:14 -0700 (Wed, 10 Feb 2010) | 3 lines
+
+- additional debugging
+- some SMS examples
+
+------------------------------------------------------------------------
+
+
 0.13 - documentation updates
 ------------------------------------------------------------------------
 r10 | scott | 2009-09-19 09:44:32 -0600 (Sat, 19 Sep 2009) | 2 lines

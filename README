@@ -1,4 +1,4 @@
-WWW-Twilio-API version 0.13
+WWW-Twilio-API version 0.14
 ===========================
 
 WWW::Twilio::API is a flexible, extensible API for Twilio written in
@@ -26,6 +26,12 @@ Make any Twilio API call in two lines of code:
 
   ## see details for a specific call
   $response = $twilio->GET('Calls/CA42ed11f93dc08b952027ffbc406d0868');
+
+  ## send an SMS message
+  $response = $twilio->POST( 'SMS/Messages',
+                             From => $from,
+                             To   => $to,
+                             Body => $body );
 
 INSTALLATION
 

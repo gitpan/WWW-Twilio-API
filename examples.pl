@@ -39,6 +39,14 @@ elsif( $action eq 'Accounts' ) {
     print $response->{content};
 }
 
+elsif( $action eq 'SMS' ) {
+    my $response = $twilio->POST('SMS/Messages',
+                                 From => shift @ARGV,
+                                 To   => shift @ARGV,
+                                 Body => shift @ARGV );
+    print $response->{content};
+}
+
 else {
     print "Unknown action.\n";
 }
