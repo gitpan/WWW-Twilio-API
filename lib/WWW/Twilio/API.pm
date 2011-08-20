@@ -4,7 +4,7 @@ use 5.008001;
 use strict;
 use warnings;
 
-our $VERSION = '0.14';
+our $VERSION = '0.15';
 our $Debug   = 0;
 
 use Crypt::SSLeay ();
@@ -13,7 +13,7 @@ use URI::Escape 'uri_escape';
 use Carp 'croak';
 
 sub API_URL     { 'https://api.twilio.com' }
-sub API_VERSION { '2008-08-01' }
+sub API_VERSION { '2010-04-01' }
 
 ## NOTE: This is an inside-out object; remove members in
 ## NOTE: the DESTROY() sub if you add additional members.
@@ -124,11 +124,51 @@ WWW::Twilio::API - Accessing Twilio's REST API with Perl
 
   ## make a phone call
   $response = $twilio->POST( 'Calls',
-                             Caller => '1234567890',
-                             Called => '8905671234',
-                             Url    => 'http://domain.tld/send_twiml' );
+                             From => '1234567890',
+                             To   => '8905671234',
+                             Url  => 'http://domain.tld/send_twiml' );
 
   print $response->{content};
+
+=head1 COMPATIBILITY NOTICE
+
+This section is for existing B<WWW::Twilio::API> users considering an
+upgrade from B<WWW::Twilio::API> versions prior to 0.15. If you're new
+to B<WWW::Twilio::API> you may safely unconcern yourself with this
+section and move on to L</DESCRIPTION> below.
+
+B<WWW::Twilio::API> since version 0.15 defaults to Twilio's
+F<2010-04-01> API. That is the only substantive change from version
+0.14. If you are one of those types of people who I<must> have the
+latest version of everything, you have two options:
+
+=over 4
+
+=item *
+
+Before you upgrade to 0.15, change all of your B<new()> method calls
+to explicitly use I<API_VERSION> as '2008-08-01', like this:
+
+  my $twilio = WWW::Twilio::API->new
+    ( AccountSid  => 'AC12345...',
+      AuthToken   => '1234567...',
+      API_VERSION => '2008-08-01' );  ## <-- add this line here
+
+Now you may safely upgrade B<WWW::Twilio::API> and stay current. You
+can then update your individual Twilio API calls piecemeal at your
+leisure.
+
+=item *
+
+Go through all of your existing I<GET>, I<PUT>, I<POST>, and I<DELETE>
+calls and make sure that they're up-to-date with Twilio's new
+'2010-04-01' API (the new API is a little simpler in some ways than
+the 2008 version) and set the API_VERSION to '2010-04-01'. Test that
+your code all works with the new API.
+
+Now you can safely upgrade B<WWW::Twilio::API>.
+
+=back
 
 =head1 DESCRIPTION
 
@@ -141,9 +181,9 @@ use B<WWW::Twilio::API>.
 B<WWW::Twilio::API> knows almost nothing about the Twilio API itself
 other than the authentication and basic format of the REST URIs.
 
-Users familiar with the API may skip the following section labeled
-L</"TWILIO API"> and move to the L</"METHODS"> section. Beginner
-should definitely continue here.
+Users already familiar with the API may skip the following section
+labeled L</"TWILIO API"> and move to the L</"METHODS">
+section. Beginners should definitely continue here.
 
 =head1 TWILIO API
 
@@ -152,7 +192,7 @@ API documentation and translate it into B<WWW::Twilio::API> calls.
 
 The Twilio API documentation is found here:
 
-  http://www.twilio.com/docs/api_reference/REST/
+  http://www.twilio.com/docs/api/rest/
 
 The Twilio REST API consists of I<requests> and I<responses>. Requests
 consist of I<Resources> and I<Properties>. Responses consist of I<HTTP
@@ -174,21 +214,21 @@ the Twilio API. Note that these are B<not> the same credentials as
 your Twilio account login username and password, which is an email
 address and a password you've selected. You'll never use your email
 address and password in the API--those are only for logging into your
-Twilio account at twilio.com.
+Twilio web account at twilio.com.
 
-Once you've signed up, be sure to add at least an Outgoing CallerID
-number in your account by clicking "Phone Numbers" and then "Add A
-Caller ID". Be sure you're near the phone whose number you entered, as
-Twilio will make an automated call to verify it. Once you've added a
-phone number, you can start playing with Twilio's I<Calls> API, which
-we'll be using in some of our examples below.
+Once you've signed up, be sure to add at least one phone number to
+your account by clicking "Numbers" and then "Verify a number". Be sure
+you're near the phone whose number you entered, as Twilio will make an
+automated call to verify it. Once you've added a phone number, you can
+start playing with Twilio's I<Calls> API, which we'll be using in some
+of our examples below.
 
 =head2 Twilio requests
 
 Twilio request I<resources> look just like a URL you might enter into
 your browser to visit a secure web page:
 
-  https://api.twilio.com/2008-08-01/Accounts/{YourAccountSid}/Calls
+  https://api.twilio.com/2010-04-01/Accounts/{YourAccountSid}/Calls
 
 In addition to the URI above, if the request is a B<POST> (as opposed
 to a B<GET>), you would also pass along certain key/value pairs that
@@ -196,17 +236,27 @@ represent the resources's I<properties>.
 
 So, to place a call using Twilio, your resource is:
 
-  https://api.twilio.com/2008-08-01/Accounts/{YourAccountSid}/Calls
+  https://api.twilio.com/2010-04-01/Accounts/{YourAccountSid}/Calls
 
 and the set of properties for this resource might be:
 
-  Called = 4155551212
-  Caller = 4158675309
-  Url = http://www.myapp.com/myhandler
+  To   = 5558675309
+  From = 4158675309
+  Url  = http://www.myapp.com/myhandler
 
 You can see the list of properties for the I<Calls> resource here:
 
-  http://www.twilio.com/docs/api_reference/REST/making_calls
+  http://www.twilio.com/docs/api/rest/making_calls
+
+Further down in L</"METHODS"> we'll cover how this works using
+B<WWW::Twilio::API>, but here's a teaser to help you see how easy your
+job as a budding Twilio developer will be:
+
+  ## call Jenny
+  $twilio->POST('Calls',
+                To => '5558675309',
+                From => '4158675309',
+                Url => 'http://www.myapp.com/myhandler');
 
 =head2 Twilio responses
 
@@ -219,21 +269,44 @@ For example, if we made the B<POST> to the I<Calls> resource above,
 and if everything went well, we'd receive a status of 200 and an XML
 document like this, telling us that everything went great:
 
+  <?xml version="1.0"?>
   <TwilioResponse>
     <Call>
-      <Sid>CA42ed11f93dc08b952027ffbc406d0868</Sid>
-      <CallSegmentSid/>
-      <AccountSid>AC309475e5fede1b49e100272a8640f438</AccountSid>
-      <Called>4155551212</Called>
-      <Caller>4158675309</Caller>
-      <PhoneNumberSid>PN01234567890123456789012345678900</PhoneNumberSid>
-      <Status>0</Status>
-      <StartTime>Thu, 03 Apr 2008 04:36:33 -0400</StartTime>
+      <Sid>CAxxxxxxxxxx</Sid>
+      <DateCreated>Wed, 10 Aug 2011 04:38:16 +0000</DateCreated>
+      <DateUpdated>Wed, 10 Aug 2011 04:38:16 +0000</DateUpdated>
+      <ParentCallSid/>
+      <AccountSid>ACxxxxxxxx</AccountSid>
+      <To>+15558675309</To>
+      <ToFormatted>(555) 867-5309</ToFormatted>
+      <From>+14158675309</From>
+      <FromFormatted>(415) 867-5309</FromFormatted>
+      <PhoneNumberSid>PNxxxxxxxxxxx</PhoneNumberSid>
+      <Status>queued</Status>
+      <StartTime/>
       <EndTime/>
+      <Duration/>
       <Price/>
-      <Flags>1</Flags>
+      <Direction>outbound-api</Direction>
+      <AnsweredBy/>
+      <ApiVersion>2010-04-01</ApiVersion>
+      <Annotation/>
+      <ForwardedFrom/>
+      <GroupSid/>
+      <CallerName/>
+      <Uri>/2010-04-01/Accounts/ACxxxxxxxxx/Calls/CAxxxxxx</Uri>
+      <SubresourceUris>
+        <Notifications>/2010-04-01/Accounts/ACxxxxxxxxxxx/Calls/CAxxxxxxx/Notifications</Notifications>
+        <Recordings>/2010-04-01/Accounts/ACxxxxxxxxxx/Calls/CAxxxxxx/Recordings</Recordings>
+      </SubresourceUris>
     </Call>
   </TwilioResponse>
+
+Don't let all this HTTP request/response (or XML) business worry you:
+B<WWW::Twilio::API> makes requests and handles responses for you, so
+you don't have to get involved with all the details. Besides, you can
+also opt to have Twilio send its responses to you in CSV, JSON, or
+HTML.
 
 =head2 Using WWW::Twilio::API
 
@@ -245,10 +318,10 @@ this is trivial:
 
 =item 1.
 
-Find the API resource you want to do (e.g., make a call, check
+Find the I<API resource> you want to do (e.g., make a call, check
 accounts, verify a caller id, etc.) in the manual. Look at the I<Base
 Resource URI>, and take note of everything I<after>
-"/2008-08-01/Accounts/{YourAccountSid}/" (e.g., I<Calls>).
+"/2010-04-01/Accounts/{YourAccountSid}/" (e.g., I<Calls>).
 
 Please see the exception for I<Accounts> above in the section L</"API
 resource name"> under the B<GET> method.
@@ -274,14 +347,29 @@ your resource will simply be "Calls", whereas to look at a particular
 call, your resource will look like
 "Calls/CA42ed11f93dc08b952027ffbc406d0868")
 
-If you're using a B<POST> method to make your call, you should see a
-table under I<Resource Properties> and the phrase "Call POST
-Parameters" in the upper left of the table. If the phrase says "Call
-Resource Properties" instead, the table is describing what the results
-will look like, not what parameters you may send.
+If you're using a B<POST> method to make your call, consult the Twilio
+documentation for making calls and you should see a table under I<POST
+Parameters> describing the required and optional parameters you may
+send in your API call.
 
-These are your I<resource parameters>: Caller = '1234567890', Called =
-'3216540987', Url = 'http://perlcode.org/cgi-bin/twilio'.
+These are your I<resource parameters> for the I<Calls> API: From =
+'1234567890', To = '5558675309', Url =
+'http://perlcode.org/cgi-bin/twilio'.
+
+Also, if you want your response in something other than XML, you may
+add any of 'csv', 'json', or 'html' (any representation found at
+http://www.twilio.com/docs/api/rest/tips) to the Twilio API call:
+
+  ## return JSON in $response->{content}
+  $response = $twilio->POST('Calls.json',
+                            To   => '5558675309',
+                            From => '1234567890',
+                            Url  => 'http://twimlets.com/callme');
+
+  ## CSV list of recordings
+  $response = $twilio->POST('Recordings.csv');
+
+See L</"Alternative resource representations"> below.
 
 =item 4.
 
@@ -294,8 +382,8 @@ you'll follow looks like this:
 For these examples, see the following pages in Twilio's API
 documentation:
 
-  http://www.twilio.com/docs/api_reference/REST/call
-  http://www.twilio.com/docs/api_reference/REST/making_calls
+  http://www.twilio.com/docs/api/rest/call
+  http://www.twilio.com/docs/api/rest/making_calls
 
 Here are the examples:
 
@@ -304,18 +392,18 @@ Here are the examples:
                                      AuthToken  => '{your auth token}' );
 
   ## view a list of calls we've made
-  $response = $twilio->GET('Calls');
-  print $response->{content};  ## this is an XML document
+  $response = $twilio->GET('Calls.json');
+  print $response->{content};  ## this is a JSON document
 
   ## view one particular call we've made
-  $response = $twilio->GET('Calls/CA42ed11f93dc08b952027ffbc406d0868');
-  print $response->{content};  ## this is an XML document
+  $response = $twilio->GET('Calls/CA42ed11f93dc08b952027ffbc406d0868.csv');
+  print $response->{content};  ## this is a CSV document
 
   ## make a new call
   $response = $twilio->POST('Calls',
-                            Caller => '1234567890',
-                            Called => '3126540987',
-                            Url    => 'http://perlcode.org/cgi-bin/twilio');
+                            From => '1234567890',
+                            To   => '3126540987',
+                            Url  => 'http://perlcode.org/cgi-bin/twilio');
   print $response->{content};  ## this is an XML document
 
 =item 5.
@@ -353,10 +441,11 @@ specify anything else either.
 
 Once we've fixed everything up, we can try again:
 
-  $response->$twilio->POST('Calls',
-                           Called => '1234567890',
-                           Caller => '3126540987',
-                           Url    => 'http://perlcode.org/cgi-bin/twilio');
+  ## call Jenny
+  $response = $twilio->POST('Calls',
+                            To   => '5558675309',
+                            From => '3126540987',
+                            Url  => 'http://perlcode.org/cgi-bin/twilio');
 
   print $response->{content};
 
@@ -365,21 +454,33 @@ which now prints:
   <?xml version="1.0"?>
   <TwilioResponse>
     <Call>
-      <Sid>xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx</Sid>
-      <DateCreated>Fri, 11 Sep 2009 11:33:20 -0700</DateCreated>
-      <DateUpdated>Fri, 11 Sep 2009 11:33:20 -0700</DateUpdated>
-      <CallSegmentSid/>
-      <AccountSid>ACxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx</AccountSid>
-      <Called>1234567890</Called>
-      <Caller>3216540987</Caller>
-      <PhoneNumberSid>xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx</PhoneNumberSid>
-      <Status>0</Status>
+      <Sid>CAxxxxxxxxxx</Sid>
+      <DateCreated>Wed, 10 Aug 2011 04:38:16 +0000</DateCreated>
+      <DateUpdated>Wed, 10 Aug 2011 04:38:16 +0000</DateUpdated>
+      <ParentCallSid/>
+      <AccountSid>ACxxxxxxxx</AccountSid>
+      <To>+15558675309</To>
+      <ToFormatted>(555) 867-5309</ToFormatted>
+      <From>+13126540987</From>
+      <FromFormatted>(312) 654-0987</FromFormatted>
+      <PhoneNumberSid>PNxxxxxxxxxxx</PhoneNumberSid>
+      <Status>queued</Status>
       <StartTime/>
       <EndTime/>
       <Duration/>
       <Price/>
-      <Flags>10</Flags>
+      <Direction>outbound-api</Direction>
+      <AnsweredBy/>
+      <ApiVersion>2010-04-01</ApiVersion>
       <Annotation/>
+      <ForwardedFrom/>
+      <GroupSid/>
+      <CallerName/>
+      <Uri>/2010-04-01/Accounts/ACxxxxxxxxx/Calls/CAxxxxxx</Uri>
+      <SubresourceUris>
+        <Notifications>/2010-04-01/Accounts/ACxxxxxxxxxxx/Calls/CAxxxxxxx/Notifications</Notifications>
+        <Recordings>/2010-04-01/Accounts/ACxxxxxxxxxx/Calls/CAxxxxxx/Recordings</Recordings>
+      </SubresourceUris>
     </Call>
   </TwilioResponse>
 
@@ -399,11 +500,17 @@ TwiML controls the flow of your call application, including responding
 to key presses, playing audio files, or "reading" text-to-speech
 phrases to the person on the other end of the line.
 
-To continue the I<Calls> example, You will need to give the I<Calls>
+To continue the I<Calls> example, you will need to give the I<Calls>
 resource a URL that returns TwiML (see
-http://www.twilio.com/docs/api_reference/TwiML/). This is not hard,
-but it does require you to have a web server somewhere on the Internet
-that can reply to GET or POST requests.
+http://www.twilio.com/docs/api/twiml/). This is not hard, but it does
+require you to have a web server somewhere on the Internet that can
+reply to GET or POST requests.
+
+Twilio provides a set of canned TwiML applications for you to use for
+free on their server, or you may download them and modify them as you
+wish. Twilio's "Twimlets" may be found here:
+
+  http://labs.twilio.com/twimlets/
 
 A TwiML document looks like this:
 
@@ -439,9 +546,9 @@ For example, you could say:
 and when you did this:
 
   $twilio->POST('Calls',
-                Caller => '1112223333',
-                Called => '1231231234',
-                Url    => 'http://twimlets.com/message?Message=Nice+to+meet+you');
+                From => '1112223333',
+                To   => '1231231234',
+                Url  => 'http://twimlets.com/message?Message=Nice+to+meet+you');
 
 Twilio's API would call '123-123-1234' and when someone answers, they
 will hear "Nice to meet you" in a somewhat computerized voice.
@@ -474,15 +581,22 @@ Your account B<auth token>.
 
 =item B<API_VERSION>
 
-Defaults to '2008-08-01'. You won't need to set this unless: a) Twilio
-updates their API, and b) you want to take advantage of it.
+Defaults to '2010-04-01'. You won't need to set this unless: a) Twilio
+updates their API, and b) you want to take advantage of it or c)
+you've coded against an older API version and need to set this for
+backward compatibility.
+
+NOTE: B<WWW::Twilio::API> prior to version 0.15 defaulted to
+'2008-08-01'; if you're upgrading B<WWW::Twilio::API>, see
+L</"COMPATIBILITY"> section at the top of this documentation.
 
 =back
 
 Example:
 
   my $twilio = new WWW::Twilio::API( AccountSid => 'AC...',
-                                     AuthToken  => '...' );
+                                     AuthToken  => '...',
+                                     API_VERSION => '2008-08-01' );
 
 =head2 General API calls
 
@@ -492,7 +606,7 @@ All API calls are of the form:
 
 where METHOD is one of B<GET>, B<POST>, B<PUT>, or B<DELETE>, and
 'Resource' is the resource URI I<after> removing the leading
-"/2008-08-01/Accounts/{YourAccountSid}/".
+"/2010-04-01/Accounts/{YourAccountSid}/".
 
 Note that you do not need to URI encode the parameters;
 B<WWW::Twilio::API> handles that for you (this just means that you
@@ -526,7 +640,8 @@ Here are the (current) elements in the response:
 
 =item B<content>
 
-Contains the response content (in XML or CSV or HTML if specified).
+Contains the response content (in XML, CSV, JSON, or HTML if
+specified).
 
 =item B<code>
 
@@ -559,7 +674,7 @@ B<$response> is a hashref that looks like this:
     message => 'OK',
   }
 
-=head2 CSV and HTML content
+=head2 Alternative resource representations
 
 By default, results come back in XML and are stored in the response's
 I<content> element. You may wish to have results returned in
@@ -568,8 +683,10 @@ end of your I<API resource>:
 
   $resp = $twilio->GET('Calls.csv');
 
-The same thing works for HTML: simply append '.html' to the end of
-your I<API resource>.
+The same thing works for JSON and HTML: simply append '.json' or
+'.html' respectively to the end of your I<API resource>. See
+http://www.twilio.com/docs/api/rest/tips for other possible
+representations.
 
 =head2 GET
 
@@ -591,13 +708,14 @@ I<Calls/CA42ed11f93dc08b952027ffbc406d0868>.
 The one exception is the I<Accounts> resource. For the I<Accounts>
 resource, you may specify 'Accounts', an empty string, or nothing (for
 B<GET> requests only), since there is nothing after the common URI
-base ("/2008-08-01/Accounts/{YourAccountSid}"). Using I<Accounts> is
+base ("/2010-04-01/Accounts/{YourAccountSid}"). Using I<Accounts> is
 recommended for orthogonality with other resources, and to be clear,
 especially when you're using a B<POST> method.
 
-You may wish to append '.csv' or '.html' to the API resource to
-receive results in CSV (comma-separated values) or HTML formats,
-instead of the default XML. See L</"CSV and HTML content"> above.
+You may wish to append '.csv', '.json' or '.html' to the API resource
+to receive results in CSV (comma-separated values), JSON, or HTML
+formats, instead of the default XML. See L</"Alternative resource
+representations"> above.
 
 =item B<API resource parameters>
 
@@ -633,7 +751,8 @@ Available parameters:
 Same as B<GET>.
 
 The following examples illustrate the use of an I<API resource> with
-I<resource parameters>:
+I<resource parameters>. Be sure to check Twilio's API for correct
+arguments for the current Twilio API version.
 
   ## validate a CallerId: 'OutgoingCallerIds' is the API resource and
   ## everything else are resource parameters
@@ -641,7 +760,7 @@ I<resource parameters>:
                             FriendlyName => "Some Caller Id",
                             PhoneNumber  => '1234567890');
 
-  ## make a phone call
+  ## make a phone call (note: this is for Twilio's 2008-08-01 API)
   $response = $twilio->POST('Calls',
                             Caller => '1231231234',
                             Called => '9081231234',
@@ -675,15 +794,16 @@ Example:
 
 =head1 API CHANGES
 
-By default, all API calls are against the F<2008-08-01> API. If you
-need to call against a different API, you may pass it into the
-constructor:
+Versions of B<WWW::Twilio::API> prior to 0.15 defaulted to
+F<2008-08-01>. API calls since B<WWW::Twilio::API> version 0.15 and
+later are against Twilio's F<2010-04-01> API. If you need to call
+against a different API, you may pass it into the constructor:
 
   $t = WWW::Twilio::API->new( AccountSid  => '...',
                               AuthToken   => '...',
                               API_VERSION => 'YYYY-MM-DD' );
 
-where 'YYYY-MM-DD' is the new API version.
+where 'YYYY-MM-DD' is the new (or old) API version.
 
 =head1 EXAMPLES
 
@@ -701,7 +821,7 @@ Scott Wiersdorf, E<lt>scott@perlcode.orgE<gt>
 
 =head1 COPYRIGHT AND LICENSE
 
-Copyright (C) 2009 by Scott Wiersdorf
+Copyright (C) 2009–2011 by Scott Wiersdorf
 
 This library is free software; you can redistribute it and/or modify
 it under the same terms as Perl itself, either Perl version 5.8.1 or,

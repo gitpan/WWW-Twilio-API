@@ -14,9 +14,9 @@ my $action      = shift @ARGV || 'Calls';
 my $twilio = new WWW::Twilio::API( AccountSid => $account_sid,
                                    AuthToken  => $auth_token, );
 
-## view a list of calls in CSV format
+## view a list of calls in JSON format
 if( $action eq 'Calls' ) {
-    my $response = $twilio->GET('Calls.csv');
+    my $response = $twilio->GET('Calls.json');
     print $response->{content};
 }
 
@@ -26,9 +26,9 @@ elsif( $action eq 'MakeCall' ) {
     my $message = URI::Escape::uri_escape("Enjoy Tabasco Brand Pepper Sauce");
     my $url = "http://perlcode.org/cgi-bin/twilio?message=$message";
     my $response = $twilio->POST('Calls',
-                                 Caller => shift @ARGV,
-                                 Called => shift @ARGV,
-                                 Url    => $url);
+                                 From => shift @ARGV,
+                                 To   => shift @ARGV,
+                                 Url  => $url);
 
     print $response->{content};
 }

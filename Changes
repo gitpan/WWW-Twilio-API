@@ -1,5 +1,18 @@
 Revision history for Perl extension WWW::Twilio::API.
 
+0.15 - default Twilio API is now 2010-04-01; DO NOT UPGRADE unless you
+understand how to make your code compatible. See documentation for
+details.
+------------------------------------------------------------------------
+r14 | scott | 2011-08-19 22:53:22 -0600 (Fri, 19 Aug 2011) | 4 lines
+
+- COMPATIBILITY NOTICE: Default API is now '2010-04-01'. See
+  documentation for details.
+- updated documentation
+
+------------------------------------------------------------------------
+
+
 0.14 - documentation updates
 ------------------------------------------------------------------------
 r12 | scott | 2010-02-10 06:59:14 -0700 (Wed, 10 Feb 2010) | 3 lines
