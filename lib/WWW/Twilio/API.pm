@@ -4,7 +4,7 @@ use 5.008001;
 use strict;
 use warnings;
 
-our $VERSION = '0.15';
+our $VERSION = '0.16';
 our $Debug   = 0;
 
 use Crypt::SSLeay ();
@@ -68,11 +68,20 @@ sub _do_request {
     $url .= "/Accounts/" . $account_sid{$self};
     $url .= ( $api eq 'Accounts' ? '' : "/$api" );
 
+    my $content = '';
+    if( keys %args ) {
+        $content = _build_content( %args );
+
+        if( $method eq 'GET' ) {
+            $url .= '?' . $content;
+        }
+    }
+
     my $req = HTTP::Request->new( $method => $url );
     $req->authorization_basic( $account_sid{$self}, $auth_token{$self} );
-    if( keys %args ) {
+    if( $content and $method ne 'GET' ) {
         $req->content_type( 'application/x-www-form-urlencoded' );
-        $req->content( _build_content( %args ) );
+        $req->content( $content );
     }
 
     local $ENV{HTTPS_DEBUG} = $Debug;

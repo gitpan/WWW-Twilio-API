@@ -1,5 +1,14 @@
 Revision history for Perl extension WWW::Twilio::API.
 
+0.16 - GET parameters (e.g., SMS/Messages) are now passed correctly
+------------------------------------------------------------------------
+r17 | scott | 2011-10-10 20:47:27 -0600 (Mon, 10 Oct 2011) | 2 lines
+
+- fixes for GET parameters
+
+------------------------------------------------------------------------
+
+
 0.15 - default Twilio API is now 2010-04-01; DO NOT UPGRADE unless you
 understand how to make your code compatible. See documentation for
 details.

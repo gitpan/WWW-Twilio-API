@@ -1,6 +1,6 @@
 --- #YAML:1.0
 name:                WWW-Twilio-API
-version:             0.15
+version:             0.16
 abstract:            Accessing Twilio's REST API with Perl
 license:             ~
 author:              
