@@ -4,7 +4,7 @@ use 5.008001;
 use strict;
 use warnings;
 
-our $VERSION = '0.16';
+our $VERSION = '0.17';
 our $Debug   = 0;
 
 use Crypt::SSLeay ();
@@ -18,9 +18,10 @@ sub API_VERSION { '2010-04-01' }
 ## NOTE: This is an inside-out object; remove members in
 ## NOTE: the DESTROY() sub if you add additional members.
 
-my %account_sid = ();
-my %auth_token  = ();
-my %api_version = ();
+my %account_sid  = ();
+my %auth_token   = ();
+my %api_version  = ();
+my %lwp_callback = ();
 
 sub new {
     my $class = shift;
@@ -28,15 +29,20 @@ sub new {
 
     my $self = bless \(my $ref), $class;
 
-    $account_sid {$self} = $args{AccountSid}  || '';
-    $auth_token  {$self} = $args{AuthToken}   || '';
-    $api_version {$self} = $args{API_VERSION} || API_VERSION();
+    $account_sid  {$self} = $args{AccountSid}   || '';
+    $auth_token   {$self} = $args{AuthToken}    || '';
+    $api_version  {$self} = $args{API_VERSION}  || API_VERSION();
+    $lwp_callback {$self} = $args{LWP_Callback} || undef;
 
     return $self;
 }
 
 sub GET {
     _do_request(shift, METHOD => 'GET', API => shift, @_);
+}
+
+sub HEAD {
+    _do_request(shift, METHOD => 'HEAD', API => shift, @_);
 }
 
 sub POST {
@@ -59,6 +65,8 @@ sub _do_request {
     my %args = @_;
 
     my $lwp = LWP::UserAgent->new;
+    $lwp_callback{$self}->($lwp)
+      if ref($lwp_callback{$self}) eq 'CODE';
     $lwp->agent("perl-WWW-Twilio-API/$VERSION");
 
     my $method = delete $args{METHOD};
@@ -599,13 +607,21 @@ NOTE: B<WWW::Twilio::API> prior to version 0.15 defaulted to
 '2008-08-01'; if you're upgrading B<WWW::Twilio::API>, see
 L</"COMPATIBILITY"> section at the top of this documentation.
 
+=item B<LWP_Callback>
+
+No default. This is a code reference you may pass in. The code
+reference will receive the internal LWP::UserAgent object immediately
+after it is created so you can set up proxies, timeouts, etc.
+
 =back
 
 Example:
 
-  my $twilio = new WWW::Twilio::API( AccountSid => 'AC...',
-                                     AuthToken  => '...',
-                                     API_VERSION => '2008-08-01' );
+  my $twilio = new WWW::Twilio::API
+    ( AccountSid => 'AC...',
+      AuthToken  => '...',
+      API_VERSION => '2008-08-01',
+      LWP_Callback => sub { shift->timeout(30) } );
 
 =head2 General API calls
 
@@ -830,7 +846,7 @@ Scott Wiersdorf, E<lt>scott@perlcode.orgE<gt>
 
 =head1 COPYRIGHT AND LICENSE
 
-Copyright (C) 2009–2011 by Scott Wiersdorf
+Copyright (C) 2009–2012 by Scott Wiersdorf
 
 This library is free software; you can redistribute it and/or modify
 it under the same terms as Perl itself, either Perl version 5.8.1 or,

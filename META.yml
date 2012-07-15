@@ -1,16 +1,24 @@
 --- #YAML:1.0
-name:                WWW-Twilio-API
-version:             0.16
-abstract:            Accessing Twilio's REST API with Perl
-license:             ~
-author:              
+name:               WWW-Twilio-API
+version:            0.17
+abstract:           Accessing Twilio's REST API with Perl
+author:
     - Scott Wiersdorf <scott@perlcode.org>
-generated_by:        ExtUtils::MakeMaker version 6.42
-distribution_type:   module
-requires:     
-    Crypt::SSLeay:                 0.51
-    LWP::UserAgent:                2.03
-    URI::Escape:                   3.28
+license:            unknown
+distribution_type:  module
+configure_requires:
+    ExtUtils::MakeMaker:  0
+build_requires:
+    ExtUtils::MakeMaker:  0
+requires:
+    Crypt::SSLeay:   0.51
+    LWP::UserAgent:  2.03
+    URI::Escape:     3.28
+no_index:
+    directory:
+        - t
+        - inc
+generated_by:       ExtUtils::MakeMaker version 6.57_05
 meta-spec:
-    url:     http://module-build.sourceforge.net/META-spec-v1.3.html
-    version: 1.3
+    url:      http://module-build.sourceforge.net/META-spec-v1.4.html
+    version:  1.4

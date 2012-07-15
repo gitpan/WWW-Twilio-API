@@ -1,5 +1,13 @@
 Revision history for Perl extension WWW::Twilio::API.
 
+0.17 - LWP callback support (thanks: Preston Gilchrist)
+------------------------------------------------------------------------
+r20 | scott | 2012-07-14 21:17:56 -0600 (Sat, 14 Jul 2012) | 1 line
+
+- LWP callback added (Preston Gilchrist)
+------------------------------------------------------------------------
+
+
 0.16 - GET parameters (e.g., SMS/Messages) are now passed correctly
 ------------------------------------------------------------------------
 r17 | scott | 2011-10-10 20:47:27 -0600 (Mon, 10 Oct 2011) | 2 lines
