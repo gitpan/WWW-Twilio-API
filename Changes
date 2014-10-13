@@ -1,5 +1,18 @@
 Revision history for Perl extension WWW::Twilio::API.
 
+r24 | scott | 2014-10-13 10:24:23 -0600 (Mon, 13 Oct 2014) | 1 line
+
+- document utf8 argument
+------------------------------------------------------------------------
+r23 | scott | 2014-10-13 10:17:31 -0600 (Mon, 13 Oct 2014) | 1 line
+
+- version bump: 0.18
+------------------------------------------------------------------------
+r22 | scott | 2014-10-13 10:17:07 -0600 (Mon, 13 Oct 2014) | 1 line
+
+- enable utf8 support [Kris Matthews] [rt#98963]
+
+
 0.17 - LWP callback support (thanks: Preston Gilchrist)
 ------------------------------------------------------------------------
 r20 | scott | 2012-07-14 21:17:56 -0600 (Sat, 14 Jul 2012) | 1 line
